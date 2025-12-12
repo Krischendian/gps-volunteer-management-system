@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { StoreProvider, useStore } from './contexts/StoreContext';
@@ -8,8 +9,10 @@ import Dashboard from './pages/Dashboard';
 import LogHours from './pages/LogHours';
 import Activities from './pages/Activities';
 import Orientation from './pages/Orientation';
+import AdminUsers from './pages/AdminUsers';
 import AnimatedBackground from './components/AnimatedBackground';
 import BrandLogo from './components/BrandLogo';
+import { UserRole } from './types';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { auth } = useStore();
@@ -30,6 +33,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
     </div>
   );
 };
+
+const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { auth } = useStore();
+    
+    if (auth.user?.role !== UserRole.ADMIN) {
+        return <Navigate to="/" replace />;
+    }
+    
+    return children;
+}
 
 const AppRoutes = () => {
     const { auth } = useStore();
@@ -59,6 +72,14 @@ const AppRoutes = () => {
             <Route path="/orientation" element={
                 <ProtectedRoute>
                     <Orientation />
+                </ProtectedRoute>
+            } />
+
+            <Route path="/users" element={
+                <ProtectedRoute>
+                    <AdminRoute>
+                        <AdminUsers />
+                    </AdminRoute>
                 </ProtectedRoute>
             } />
         </Routes>
