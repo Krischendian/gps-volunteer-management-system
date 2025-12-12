@@ -1,12 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../contexts/StoreContext';
 import { MapPin, Calendar, Users, Check, X, Share2, AlertCircle, Plus, Edit2, Trash2, Save } from 'lucide-react';
 import { UserRole } from '../types';
+import { useSearchParams } from 'react-router-dom';
 
 const Activities: React.FC = () => {
   const { activities, registerForActivity, cancelRegistration, addActivity, updateActivity, deleteActivity, auth } = useStore();
   const isAdmin = auth.user?.role === UserRole.ADMIN;
+  const [searchParams] = useSearchParams();
+  const deepLinkActivityId = searchParams.get('activity');
 
   // Registration/Leave Modal State
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -25,6 +28,15 @@ const Activities: React.FC = () => {
     image: '',
     capacity: 20
   });
+
+  // Ref to scroll to highlighted activity
+  const highlightedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (deepLinkActivityId && highlightedRef.current) {
+        highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [deepLinkActivityId]);
 
   const handleRegister = (id: string) => {
     registerForActivity(id);
@@ -45,7 +57,9 @@ const Activities: React.FC = () => {
   };
 
   const handleInvite = (activityId: string, title: string) => {
-    const link = `https://volunteer.gps.org/join?activity=${activityId}`;
+    // Hardcoded production URL as requested
+    const link = `https://gps-volunteer-system.vercel.app/#/activities?activity=${activityId}`;
+    
     navigator.clipboard.writeText(`Join me at "${title}"! Sign up here: ${link}`);
     setCopiedId(activityId);
     setTimeout(() => setCopiedId(null), 2000);
@@ -114,8 +128,14 @@ const Activities: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activities.map((activity) => (
-          <div key={activity.id} className="glass-card rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col border border-white/50 relative">
+        {activities.map((activity) => {
+          const isHighlighted = activity.id === deepLinkActivityId;
+          return (
+          <div 
+            key={activity.id} 
+            ref={isHighlighted ? highlightedRef : null}
+            className={`glass-card rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col border border-white/50 relative ${isHighlighted ? 'ring-4 ring-gps-blue ring-offset-4 shadow-gps-blue/20' : ''}`}
+          >
             
             {/* Admin Controls Overlay */}
             {isAdmin && (
@@ -208,7 +228,7 @@ const Activities: React.FC = () => {
               </div>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Leave Request Modal */}
