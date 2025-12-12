@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../contexts/StoreContext';
 import { Clock, Star, Sparkles, Search, Award, Crown, Zap, Calendar, MapPin, ArrowRight, Share2, X, AlertCircle, TrendingUp, Users } from 'lucide-react';
@@ -14,7 +15,7 @@ const LEVELS = [
 ];
 
 const Dashboard: React.FC = () => {
-  const { auth, sessions, totalHours, activities, cancelRegistration } = useStore();
+  const { auth, sessions, totalHours, activities, cancelRegistration, allUsers } = useStore();
   const [aiMessage, setAiMessage] = useState<string>('Generating your impact report...');
   const [loadingAi, setLoadingAi] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,10 +101,14 @@ const Dashboard: React.FC = () => {
   }, [auth.user, displayHours, isAdmin]);
 
   // Filter Sessions for Display
-  const filteredSessions = mySessions.filter(s => 
-    s.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.date.includes(searchTerm)
-  );
+  const filteredSessions = mySessions.filter(s => {
+    const searchLower = searchTerm.toLowerCase();
+    const volunteerName = isAdmin ? allUsers?.find(u => u.id === s.userId)?.name.toLowerCase() || '' : '';
+    
+    return s.eventName?.toLowerCase().includes(searchLower) || 
+           s.date.includes(searchTerm) ||
+           (isAdmin && volunteerName.includes(searchLower));
+  });
 
   // Filter Upcoming Registered Events
   const upcomingEvents = activities.filter(a => a.isRegistered);
@@ -321,7 +326,7 @@ const Dashboard: React.FC = () => {
               <div className="relative w-full md:w-auto md:min-w-[320px]">
                   <input 
                     type="text" 
-                    placeholder={isAdmin ? "Search logs (e.g. Event Name, Date)..." : "Search (e.g. Annual Food Drive, 2025-12-01)..."}
+                    placeholder={isAdmin ? "Search logs or volunteers..." : "Search (e.g. Annual Food Drive, 2025-12-01)..."}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-gps-blue focus:border-gps-blue outline-none transition-all text-sm bg-white/80"
@@ -337,6 +342,7 @@ const Dashboard: React.FC = () => {
                      <table className="w-full text-left min-w-[600px]">
                          <thead className="bg-slate-50/80 border-b border-slate-100">
                              <tr>
+                                 {isAdmin && <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Volunteer</th>}
                                  {/* Adjusted padding for mobile: px-4 */}
                                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
                                  <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Program Name</th>
@@ -348,6 +354,11 @@ const Dashboard: React.FC = () => {
                          <tbody className="divide-y divide-slate-100">
                              {filteredSessions.map((s) => (
                                  <tr key={s.id} className="hover:bg-blue-50/30 transition-colors">
+                                     {isAdmin && (
+                                         <td className="px-4 md:px-6 py-4 text-sm font-semibold text-gps-blue whitespace-nowrap">
+                                             {allUsers.find(u => u.id === s.userId)?.name || 'Unknown User'}
+                                         </td>
+                                     )}
                                      <td className="px-4 md:px-6 py-4 text-sm font-medium text-slate-600 whitespace-nowrap">{s.date}</td>
                                      <td className="px-4 md:px-6 py-4 text-sm text-slate-800 font-semibold">{s.eventName}</td>
                                      <td className="px-4 md:px-6 py-4 text-sm text-slate-600">{s.supervisorName}</td>
