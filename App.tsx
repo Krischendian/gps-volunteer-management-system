@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { StoreProvider, useStore } from './contexts/StoreContext';
@@ -23,7 +22,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 md:ml-64 p-6 md:p-12 max-w-[1600px]">
+      {/* Updated container: Reduced padding on mobile (p-4), added overflow-x-hidden to prevent full-page scroll */}
+      <main className="flex-1 md:ml-64 p-4 md:p-8 lg:p-12 w-full max-w-[1600px] overflow-x-hidden pb-24 md:pb-12">
         {children}
       </main>
       <MobileNav />
