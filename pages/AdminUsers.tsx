@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../contexts/StoreContext';
-import { Search, CheckCircle, XCircle, ShieldCheck, Mail, Clock, Calendar, Eye, User, Briefcase, FileText, Phone, MapPin, X } from 'lucide-react';
+import { Search, CheckCircle, Clock, Eye, User, Briefcase, FileText, Phone, Mail, ShieldCheck, X, Calendar, ClipboardList } from 'lucide-react';
 import { UserRole, User as UserType } from '../types';
 
 const AdminUsers: React.FC = () => {
@@ -155,7 +155,7 @@ const AdminUsers: React.FC = () => {
       {/* User Detail Modal */}
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl animate-scale-up border-4 border-white flex flex-col overflow-hidden">
+            <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] shadow-2xl animate-scale-up border-4 border-white flex flex-col overflow-hidden">
                 
                 {/* Header */}
                 <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
@@ -202,9 +202,9 @@ const AdminUsers: React.FC = () => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 bg-white">
+                <div className="flex-1 overflow-y-auto bg-white">
                     {activeTab === 'profile' ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-6">
                                 <div>
                                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -308,36 +308,67 @@ const AdminUsers: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="flex flex-col h-full">
                             {selectedUserSessions.length > 0 ? (
-                                <table className="w-full text-left">
-                                    <thead className="bg-slate-50 border-b border-slate-100 sticky top-0">
-                                        <tr>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Date</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Activity</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Supervisor</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase text-right">Hours</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase">Notes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {selectedUserSessions.map(session => (
-                                            <tr key={session.id} className="hover:bg-slate-50">
-                                                <td className="px-4 py-3 text-sm text-slate-600 font-medium">{session.date}</td>
-                                                <td className="px-4 py-3 text-sm text-slate-800 font-bold">{session.eventName}</td>
-                                                <td className="px-4 py-3 text-sm text-slate-600">{session.supervisorName}</td>
-                                                <td className="px-4 py-3 text-sm text-gps-blue font-bold text-right">{session.hours}</td>
-                                                <td className="px-4 py-3 text-xs text-slate-500 italic max-w-xs truncate" title={session.description}>
-                                                    {session.description}
-                                                </td>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left min-w-[700px]">
+                                        <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                                            <tr>
+                                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Date</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Time</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-48">Activity</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-40">Supervisor</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-24">Hours</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {selectedUserSessions.map((session) => (
+                                                <tr key={session.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="px-6 py-4 text-sm font-medium text-slate-600 whitespace-nowrap">
+                                                        {new Date(session.date).toLocaleDateString(undefined, {
+                                                            weekday: 'short',
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">
+                                                        {session.startTime} - {session.endTime}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-800 font-bold">
+                                                        {session.eventName}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        <div className="whitespace-pre-line leading-relaxed max-w-xs md:max-w-sm">
+                                                            {session.description}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-400">
+                                                                {session.supervisorName?.charAt(0).toUpperCase() || '?'}
+                                                            </div>
+                                                            {session.supervisorName}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <span className="inline-block bg-gps-blue/10 text-gps-blue font-bold px-3 py-1 rounded-lg text-sm">
+                                                            {session.hours} hrs
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             ) : (
-                                <div className="text-center py-12 text-slate-400">
-                                    <Calendar size={48} className="mx-auto mb-3 opacity-50" />
-                                    <p>No activity logs found for this volunteer.</p>
+                                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-12">
+                                    <div className="bg-slate-50 p-6 rounded-full mb-4">
+                                        <ClipboardList size={48} className="opacity-50" />
+                                    </div>
+                                    <p className="text-lg font-medium">No activity logs found</p>
+                                    <p className="text-sm opacity-75">This volunteer hasn't logged any hours yet.</p>
                                 </div>
                             )}
                         </div>
