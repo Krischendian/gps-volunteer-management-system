@@ -91,8 +91,8 @@ const LogHours: React.FC = () => {
             </div>
         </div>
 
-        {/* Increased gap to gap-8 to separate Start and End time more */}
-        <div className="grid grid-cols-2 gap-8 md:gap-6">
+        {/* Increased gap to gap-12 and constrained width (w-[90%]) to match Date input */}
+        <div className="w-[90%] md:w-full grid grid-cols-2 gap-12 md:gap-6">
              <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">
                     Start Time
