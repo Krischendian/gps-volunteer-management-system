@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../contexts/StoreContext';
-import { Clock, Star, Sparkles, Search, Award, Crown, Zap, Calendar, MapPin, ArrowRight, Share2, X, AlertCircle, TrendingUp, Users } from 'lucide-react';
+import { Clock, Star, Sparkles, Search, Award, Crown, Zap, Calendar, MapPin, ArrowRight, Share2, X, AlertCircle, TrendingUp, Users, ChevronRight } from 'lucide-react';
 import { generateImpactMessage } from '../services/geminiService';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const LEVELS = [
@@ -19,6 +19,7 @@ const Dashboard: React.FC = () => {
   const [aiMessage, setAiMessage] = useState<string>('Generating your impact report...');
   const [loadingAi, setLoadingAi] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
   
   // Leave Request Modal State
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -111,7 +112,16 @@ const Dashboard: React.FC = () => {
   });
 
   // Filter Upcoming Registered Events
-  const upcomingEvents = activities.filter(a => a.isRegistered);
+  // Only show events that the user is registered for AND are in the future (or today)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const upcomingEvents = activities.filter(a => {
+      if (!a.isRegistered) return false;
+      const actDate = new Date(a.date);
+      // Simple date comparison
+      return actDate >= today;
+  }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Chart Data Preparation (Last 6 Months)
   const getChartData = () => {
@@ -151,7 +161,12 @@ const Dashboard: React.FC = () => {
   const chartData = getChartData();
 
   const handleInvite = (activityId: string, title: string) => {
-    const link = `https://volunteer.gps.org/join?activity=${activityId}`;
+    // Robust URL generation: take current full URL, strip hash.
+    // We simply append the new hash. This works for both '/' and '/index.html' base paths.
+    // Do NOT force a trailing slash as it breaks file-based URLs.
+    const baseUrl = window.location.href.split('#')[0];
+    const link = `${baseUrl}#/join?activity=${activityId}`;
+    
     navigator.clipboard.writeText(`Join me at "${title}"! Sign up here: ${link}`);
     setCopiedId(activityId);
     setTimeout(() => setCopiedId(null), 2000);
@@ -169,6 +184,11 @@ const Dashboard: React.FC = () => {
         setShowLeaveModal(false);
         setSelectedActivityId(null);
     }
+  };
+
+  const goToActivity = (id: string) => {
+      // Use the robust hash routing navigation
+      navigate(`/activities?activity=${id}`);
   };
 
   return (
@@ -315,6 +335,57 @@ const Dashboard: React.FC = () => {
             <p className="text-xs text-center text-slate-400 mt-2">Volunteer Hours (Last 6 Months)</p>
         </div>
       </div>
+
+      {/* UPCOMING EVENTS SECTION - Only for Volunteers */}
+      {!isAdmin && (
+        <div className="space-y-4">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Calendar className="text-gps-blue" size={24} />
+                My Upcoming Events
+            </h2>
+            
+            {upcomingEvents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {upcomingEvents.map((activity) => (
+                        <div 
+                            key={activity.id} 
+                            className="bg-white rounded-2xl p-3 border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer group"
+                            onClick={() => goToActivity(activity.id)}
+                        >
+                            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
+                                <img src={activity.image} alt={activity.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-bold text-slate-800 truncate group-hover:text-gps-blue transition-colors">{activity.title}</h4>
+                                <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                    <Calendar size={12} />
+                                    {new Date(activity.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                </div>
+                                <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 truncate">
+                                    <MapPin size={12} />
+                                    {activity.location}
+                                </div>
+                            </div>
+                            <div className="pr-2 text-slate-300 group-hover:text-gps-blue transition-colors">
+                                <ChevronRight size={20} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center">
+                    <div className="bg-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-400">
+                        <Calendar size={24} />
+                    </div>
+                    <p className="text-slate-600 font-medium mb-2">No upcoming events scheduled.</p>
+                    <p className="text-xs text-slate-400 mb-4">Browse our activities and sign up today!</p>
+                    <Link to="/activities" className="inline-flex items-center gap-2 text-sm font-bold text-gps-blue hover:underline">
+                        Find Activities <ArrowRight size={14} />
+                    </Link>
+                </div>
+            )}
+        </div>
+      )}
 
       {/* SEARCH & HISTORY SECTION */}
       <div className="space-y-4">
