@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useStore } from '../contexts/StoreContext';
 import { Clock, Save } from 'lucide-react';
@@ -47,7 +46,7 @@ const LogHours: React.FC = () => {
         <p className="text-slate-500 mt-2">Record your contribution to the community.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="glass-card p-8 rounded-2xl shadow-sm space-y-6">
+      <form onSubmit={handleSubmit} className="glass-card p-6 md:p-8 rounded-2xl shadow-sm space-y-6">
         
         <div className="space-y-2">
             <label className="block text-sm font-semibold text-slate-700">Program / Event Name</label>
@@ -73,42 +72,47 @@ const LogHours: React.FC = () => {
             />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">Date</label>
+                {/* Reduced vertical padding on mobile for compactness */}
                 <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+                    className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
             
             <div className="bg-brand-50 rounded-xl p-4 flex flex-col justify-center items-center text-center border border-brand-100">
-                <span className="text-sm font-medium text-brand-600 uppercase tracking-wide">Total Duration</span>
-                <span className="text-4xl font-bold text-brand-700 mt-1">{hours} <span className="text-lg font-medium text-brand-500">hrs</span></span>
+                <span className="text-xs md:text-sm font-medium text-brand-600 uppercase tracking-wide">Total Duration</span>
+                <span className="text-3xl md:text-4xl font-bold text-brand-700 mt-1">{hours} <span className="text-base md:text-lg font-medium text-brand-500">hrs</span></span>
             </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-3 md:gap-6">
              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-slate-700">Start Time</label>
+                <label className="block text-sm font-semibold text-slate-700">
+                    Start Time <span className="block md:inline text-[10px] md:text-xs font-normal text-slate-400 md:ml-1">(HH:MM AM/PM)</span>
+                </label>
                 <input
                     type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+                    className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-slate-700">End Time</label>
+                <label className="block text-sm font-semibold text-slate-700">
+                    End Time <span className="block md:inline text-[10px] md:text-xs font-normal text-slate-400 md:ml-1">(HH:MM AM/PM)</span>
+                </label>
                 <input
                     type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+                    className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
