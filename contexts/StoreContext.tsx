@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, WorkSession, Activity, AuthState, UserRole } from '../types';
 import { auth, db } from '../services/firebase';
@@ -5,20 +6,19 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged,
-  User as FirebaseUser
+  onAuthStateChanged 
 } from 'firebase/auth';
 import { 
   collection, 
   doc, 
-  setDoc, 
   getDoc, 
-  getDocs, 
+  setDoc, 
   addDoc, 
-  updateDoc,
-  query,
-  where,
-  onSnapshot
+  updateDoc, 
+  deleteDoc,
+  onSnapshot, 
+  query, 
+  where 
 } from 'firebase/firestore';
 
 interface StoreContextType {
@@ -35,6 +35,12 @@ interface StoreContextType {
   registerForActivity: (activityId: string) => void;
   cancelRegistration: (activityId: string, reason: string) => void;
   
+  // New Admin Actions & Data
+  addActivity: (activity: Omit<Activity, 'id' | 'registeredCount' | 'isRegistered'>) => Promise<void>;
+  updateActivity: (id: string, data: Partial<Activity>) => Promise<void>;
+  deleteActivity: (id: string) => Promise<void>;
+  allUsers: User[]; // List of all users for admin
+
   totalHours: number;
   
   appLogo: string | null;
@@ -44,37 +50,17 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-// Initial Mock Activities (used if DB is empty)
+// Initial Mock Activities (used if DB is empty or inaccessible)
 const MOCK_ACTIVITIES: Activity[] = [
   {
-    id: '1',
-    title: 'Community Garden Cleanup',
-    date: '2023-11-15',
-    location: 'Central Park Garden',
-    description: 'Help us maintain the beauty of our therapeutic garden for gifted individuals.',
-    image: 'https://picsum.photos/400/200?random=1',
-    capacity: 20,
-    registeredCount: 12,
-  },
-  {
-    id: '2',
-    title: 'Art Workshop Assistant',
-    date: '2023-11-20',
-    location: 'GPS Center, Room 3B',
-    description: 'Assist during our weekly creative expression workshop.',
-    image: 'https://picsum.photos/400/200?random=2',
-    capacity: 5,
-    registeredCount: 3,
-  },
-  {
-    id: '3',
-    title: 'Holiday Food Drive',
-    date: '2023-12-05',
-    location: 'Main Hall',
-    description: 'Organizing and packing food baskets for families in need.',
-    image: 'https://picsum.photos/400/200?random=3',
-    capacity: 50,
-    registeredCount: 45,
+    id: 'christmas_party_001',
+    title: '儿童圣诞Party 义工招募',
+    date: '2025-12-20', // Set to a Saturday
+    location: '250 Ferrier Street A1, Markham, L3R 2Z5',
+    description: '活动内容：儿童圣诞party。主要工作：布置场地，协助活动，收尾打扫等。\n时间：12:30pm – 3:30 pm\n\n*可签义工时数表',
+    image: 'https://images.unsplash.com/photo-1512474932049-78ea696f5c42?q=80&w=800&auto=format&fit=crop', // Festive Christmas Image
+    capacity: 10,
+    registeredCount: 0,
   }
 ];
 
@@ -82,7 +68,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [userState, setUserState] = useState<AuthState>({ user: null, isAuthenticated: false });
   const [sessions, setSessions] = useState<WorkSession[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]); // Admin only
+  
+  // Use state for logo, fetched from Firestore
   const [appLogo, setAppLogoState] = useState<string | null>(null);
+  
   const [loading, setLoading] = useState(true);
 
   // 1. Listen for Auth Changes
@@ -91,30 +81,46 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (firebaseUser) {
         // Fetch extended user data from Firestore
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as User;
-          setUserState({
-            isAuthenticated: true,
-            user: { ...userData, id: firebaseUser.uid }
-          });
-        } else {
-          // Fallback if doc doesn't exist yet
-          setUserState({
-            isAuthenticated: true,
-            user: { 
-              id: firebaseUser.uid, 
-              name: firebaseUser.displayName || firebaseUser.email || 'Volunteer',
-              email: firebaseUser.email || '',
-              orientationSigned: false,
-              role: UserRole.VOLUNTEER
-            }
-          });
+        try {
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data() as User;
+            setUserState({
+              isAuthenticated: true,
+              user: { ...userData, id: firebaseUser.uid }
+            });
+          } else {
+            // Fallback if doc doesn't exist yet
+            setUserState({
+              isAuthenticated: true,
+              user: { 
+                id: firebaseUser.uid, 
+                name: firebaseUser.displayName || firebaseUser.email || 'Volunteer',
+                email: firebaseUser.email || '',
+                orientationSigned: false,
+                role: UserRole.VOLUNTEER
+              }
+            });
+          }
+        } catch (error) {
+           console.error("Error fetching user profile:", error);
+           // Allow login even if profile fetch fails (e.g. permission issues)
+           setUserState({
+              isAuthenticated: true,
+              user: { 
+                id: firebaseUser.uid, 
+                name: firebaseUser.displayName || firebaseUser.email || 'Volunteer',
+                email: firebaseUser.email || '',
+                orientationSigned: false,
+                role: UserRole.VOLUNTEER
+              }
+            });
         }
       } else {
         setUserState({ user: null, isAuthenticated: false });
         setSessions([]); // Clear data on logout
+        setAllUsers([]);
       }
       setLoading(false);
     });
@@ -122,9 +128,24 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return () => unsubscribe();
   }, []);
 
-  // 2. Fetch Data (Sessions & Activities)
+  // 2. Fetch Data (Sessions & Activities & Global Settings & Users if Admin)
   useEffect(() => {
-    if (!userState.user) return;
+    // Global Settings Listener (Logo)
+    const settingsRef = doc(db, 'settings', 'general');
+    const unsubSettings = onSnapshot(settingsRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data && data.logoUrl) {
+          setAppLogoState(data.logoUrl);
+        }
+      }
+    }, (error) => {
+        console.warn("Global settings sync failed (likely permissions):", error.code);
+    });
+
+    if (!userState.user) {
+        return () => unsubSettings();
+    }
 
     // Fetch Activities
     const qActivities = collection(db, 'activities');
@@ -136,18 +157,25 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (acts.length === 0) {
         MOCK_ACTIVITIES.forEach(async (act) => {
              const { id, ...data } = act;
-             await addDoc(collection(db, 'activities'), data);
+             try {
+                await addDoc(collection(db, 'activities'), data);
+             } catch(e) { 
+                 // Ignore write errors
+             }
         });
         setActivities(MOCK_ACTIVITIES);
       } else {
         setActivities(acts);
       }
+    }, (error) => {
+        console.warn("Activities sync failed:", error.message);
+        setActivities(MOCK_ACTIVITIES);
     });
 
     // Fetch Sessions (Admin sees all, User sees own)
     let qSessions;
     if (userState.user.role === UserRole.ADMIN) {
-      qSessions = query(collection(db, 'sessions'));
+      qSessions = collection(db, 'sessions');
     } else {
       qSessions = query(collection(db, 'sessions'), where('userId', '==', userState.user.id));
     }
@@ -156,11 +184,29 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const sess: WorkSession[] = [];
       snapshot.forEach(doc => sess.push({ ...doc.data(), id: doc.id } as WorkSession));
       setSessions(sess);
+    }, (error) => {
+        console.warn("Sessions sync failed:", error.message);
+        setSessions([]);
     });
 
+    // Fetch All Users (Admin Only)
+    let unsubUsers = () => {};
+    if (userState.user.role === UserRole.ADMIN) {
+        const qUsers = collection(db, 'users');
+        unsubUsers = onSnapshot(qUsers, (snapshot) => {
+            const usersList: User[] = [];
+            snapshot.forEach(doc => usersList.push({ ...doc.data(), id: doc.id } as User));
+            setAllUsers(usersList);
+        }, (error) => {
+            console.warn("Users sync failed:", error.message);
+        });
+    }
+
     return () => {
+      unsubSettings();
       unsubActivities();
       unsubSessions();
+      unsubUsers();
     };
   }, [userState.user]);
 
@@ -174,13 +220,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const role = email.toLowerCase().includes('admin') ? UserRole.ADMIN : UserRole.VOLUNTEER;
     
     // Create User Document in Firestore
-    await setDoc(doc(db, 'users', res.user.uid), {
-      ...userData,
-      email,
-      id: res.user.uid,
-      role,
-      orientationSigned: userData.orientationSigned || false
-    });
+    try {
+        if (res.user) {
+            await setDoc(doc(db, 'users', res.user.uid), {
+              ...userData,
+              email,
+              id: res.user.uid,
+              role,
+              orientationSigned: userData.orientationSigned || false
+            });
+        }
+    } catch (error) {
+        console.error("Error creating user profile doc:", error);
+    }
   };
 
   const logout = async () => {
@@ -189,40 +241,49 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const logSession = async (data: Omit<WorkSession, 'id' | 'userId'>) => {
     if (!userState.user) return;
-    await addDoc(collection(db, 'sessions'), {
-      ...data,
-      userId: userState.user.id,
-      timestamp: new Date()
-    });
+    try {
+        await addDoc(collection(db, 'sessions'), {
+          ...data,
+          userId: userState.user.id,
+          timestamp: new Date()
+        });
+    } catch (error) {
+        console.error("Error logging session:", error);
+        alert("Failed to save session. Check your connection or permissions.");
+    }
   };
 
   const signOrientation = async () => {
     if (!userState.user) return;
     const userRef = doc(db, 'users', userState.user.id);
-    await updateDoc(userRef, {
-      orientationSigned: true,
-      orientationDate: new Date().toISOString()
-    });
-    // Optimistic update
-    setUserState(prev => ({
-        ...prev,
-        user: { ...prev.user!, orientationSigned: true, orientationDate: new Date().toISOString() }
-    }));
+    try {
+        await updateDoc(userRef, {
+          orientationSigned: true,
+          orientationDate: new Date().toISOString()
+        });
+        // Optimistic update
+        setUserState(prev => ({
+            ...prev,
+            user: { ...prev.user!, orientationSigned: true, orientationDate: new Date().toISOString() }
+        }));
+    } catch (error) {
+        console.error("Error signing orientation:", error);
+    }
   };
 
   const registerForActivity = async (activityId: string) => {
-    // In a real app, use arrayUnion logic or subcollection
-    // Simplified logic: increment local counter for now or update doc
     const act = activities.find(a => a.id === activityId);
     if (act) {
        const actRef = doc(db, 'activities', activityId);
-       await updateDoc(actRef, {
-         registeredCount: act.registeredCount + 1,
-         // Note: Real implementation needs a subcollection to track WHO registered to prevent double signup
-       });
-       
-       // Hack for UI state in this simplified demo
-       setActivities(prev => prev.map(a => a.id === activityId ? {...a, isRegistered: true} : a));
+       try {
+           await updateDoc(actRef, {
+             registeredCount: act.registeredCount + 1,
+           });
+           setActivities(prev => prev.map(a => a.id === activityId ? {...a, isRegistered: true} : a));
+       } catch (error) {
+           console.error("Error registering:", error);
+           setActivities(prev => prev.map(a => a.id === activityId ? {...a, isRegistered: true} : a));
+       }
     }
   };
 
@@ -231,16 +292,64 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
      const act = activities.find(a => a.id === activityId);
      if (act) {
         const actRef = doc(db, 'activities', activityId);
-        await updateDoc(actRef, {
-          registeredCount: Math.max(0, act.registeredCount - 1)
-        });
-        setActivities(prev => prev.map(a => a.id === activityId ? {...a, isRegistered: false} : a));
+        try {
+            await updateDoc(actRef, {
+              registeredCount: Math.max(0, act.registeredCount - 1)
+            });
+            setActivities(prev => prev.map(a => a.id === activityId ? {...a, isRegistered: false} : a));
+        } catch (error) {
+            console.error("Error cancelling:", error);
+            setActivities(prev => prev.map(a => a.id === activityId ? {...a, isRegistered: false} : a));
+        }
      }
   };
 
-  const setAppLogo = (logo: string) => {
+  // --- New Admin Functions ---
+
+  const addActivity = async (activity: Omit<Activity, 'id' | 'registeredCount' | 'isRegistered'>) => {
+    try {
+      await addDoc(collection(db, 'activities'), {
+        ...activity,
+        registeredCount: 0,
+        createdAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error adding activity:", error);
+      throw error;
+    }
+  };
+
+  const updateActivity = async (id: string, data: Partial<Activity>) => {
+    try {
+      const activityRef = doc(db, 'activities', id);
+      await updateDoc(activityRef, data);
+    } catch (error) {
+      console.error("Error updating activity:", error);
+      throw error;
+    }
+  };
+
+  const deleteActivity = async (id: string) => {
+    try {
+      const activityRef = doc(db, 'activities', id);
+      await deleteDoc(activityRef);
+    } catch (error) {
+      console.error("Error deleting activity:", error);
+      throw error;
+    }
+  };
+
+  const setAppLogo = async (logo: string) => {
     setAppLogoState(logo);
-    // Ideally save to storage, skipping for now
+    try {
+        await setDoc(doc(db, 'settings', 'general'), { 
+            logoUrl: logo,
+            updatedBy: userState.user?.id || 'unknown',
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    } catch (error) {
+        console.error("Failed to sync logo to cloud:", error);
+    }
   };
 
   const totalHours = sessions.reduce((acc, curr) => acc + curr.hours, 0);
@@ -250,6 +359,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       auth: userState, login, register, logout, signOrientation, 
       sessions, logSession, 
       activities, registerForActivity, cancelRegistration,
+      addActivity, updateActivity, deleteActivity,
+      allUsers,
       totalHours,
       appLogo, setAppLogo,
       loading
