@@ -75,12 +75,12 @@ const LogHours: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">Date</label>
-                {/* Reduced vertical padding on mobile for compactness */}
+                {/* Reduced vertical padding (py-2.5) for compactness on mobile */}
                 <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
@@ -91,28 +91,31 @@ const LogHours: React.FC = () => {
             </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:gap-6">
+        {/* Increased gap to gap-5 to ensure separate look */}
+        <div className="grid grid-cols-2 gap-5 md:gap-6">
              <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">
-                    Start Time <span className="block md:inline text-[10px] md:text-xs font-normal text-slate-400 md:ml-1">(HH:MM AM/PM)</span>
+                    Start Time
                 </label>
+                {/* Reduced vertical padding (py-2.5) */}
                 <input
                     type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
              <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">
-                    End Time <span className="block md:inline text-[10px] md:text-xs font-normal text-slate-400 md:ml-1">(HH:MM AM/PM)</span>
+                    End Time
                 </label>
+                {/* Reduced vertical padding (py-2.5) */}
                 <input
                     type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
