@@ -75,12 +75,12 @@ const LogHours: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">Date</label>
-                {/* Reduced vertical padding (py-2.5) for compactness on mobile */}
+                {/* Shortened width on mobile (w-[90%]) and reduced padding */}
                 <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
+                    className="w-[90%] md:w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm md:text-base"
                     required
                 />
             </div>
@@ -91,13 +91,12 @@ const LogHours: React.FC = () => {
             </div>
         </div>
 
-        {/* Increased gap to gap-5 to ensure separate look */}
-        <div className="grid grid-cols-2 gap-5 md:gap-6">
+        {/* Increased gap to gap-8 to separate Start and End time more */}
+        <div className="grid grid-cols-2 gap-8 md:gap-6">
              <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">
                     Start Time
                 </label>
-                {/* Reduced vertical padding (py-2.5) */}
                 <input
                     type="time"
                     value={startTime}
@@ -110,7 +109,6 @@ const LogHours: React.FC = () => {
                 <label className="block text-sm font-semibold text-slate-700">
                     End Time
                 </label>
-                {/* Reduced vertical padding (py-2.5) */}
                 <input
                     type="time"
                     value={endTime}
