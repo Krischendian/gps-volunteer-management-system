@@ -16,9 +16,9 @@ const ROLES_OPTIONS = [
   "Fundraising",
   "Marketing",
   "Social Media",
-  "Program Facilitation",
-  "Classroom Help",
-  "Parent Help",
+  "Program Assistant",
+  "Classroom Support",
+  "Parent Support",
   "Cleaning and Organizing",
   "Other"
 ];
