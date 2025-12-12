@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useStore } from '../contexts/StoreContext';
 import { 
@@ -16,9 +17,9 @@ const ROLES_OPTIONS = [
   "Fundraising",
   "Marketing",
   "Social Media",
-  "Program Assistant",
-  "Classroom Support",
-  "Parent Support",
+  "Program Facilitation",
+  "Classroom Help",
+  "Parent Help",
   "Cleaning and Organizing",
   "Other"
 ];
@@ -190,7 +191,7 @@ const Auth: React.FC = () => {
         {step === 'LOGIN' && (
           <form onSubmit={handleLoginSubmit} className="space-y-6 animate-slide-up max-w-md mx-auto">
             <div className="text-center">
-                <h2 className="text-3xl font-bold text-slate-800">Welcome Back</h2>
+                <h2 className="text-3xl font-bold text-slate-800">Welcome</h2>
                 <p className="text-slate-500 mt-2">Log in to your volunteer dashboard</p>
             </div>
             
