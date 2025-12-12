@@ -161,11 +161,8 @@ const Dashboard: React.FC = () => {
   const chartData = getChartData();
 
   const handleInvite = (activityId: string, title: string) => {
-    // Robust URL generation: take current full URL, strip hash.
-    // We simply append the new hash. This works for both '/' and '/index.html' base paths.
-    // Do NOT force a trailing slash as it breaks file-based URLs.
-    const baseUrl = window.location.href.split('#')[0];
-    const link = `${baseUrl}#/join?activity=${activityId}`;
+    // Hardcoded production URL as requested
+    const link = `https://gps-volunteer-system.vercel.app/#/activities?activity=${activityId}`;
     
     navigator.clipboard.writeText(`Join me at "${title}"! Sign up here: ${link}`);
     setCopiedId(activityId);
