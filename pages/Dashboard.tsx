@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const LEVELS = [
-    { name: 'Volunteer', min: 0, color: 'text-slate-500', bg: 'bg-slate-500', border: 'border-slate-200', icon: Star },
+    { name: 'Bronze Volunteer', min: 0, color: 'text-amber-700', bg: 'bg-amber-700', border: 'border-amber-200', icon: Star },
     { name: 'Cobalt', min: 500, color: 'text-blue-600', bg: 'bg-blue-600', border: 'border-blue-200', icon: Zap },
     { name: 'Silver', min: 1000, color: 'text-slate-600', bg: 'bg-slate-400', border: 'border-slate-300', icon: Award },
     { name: 'Gold', min: 2000, color: 'text-yellow-600', bg: 'bg-yellow-500', border: 'border-yellow-400', icon: Crown },
@@ -318,10 +318,10 @@ const Dashboard: React.FC = () => {
                   <Clock className="text-gps-blue" size={24} />
                   {isAdmin ? 'All Volunteer Logs' : 'Past Activities'}
               </h2>
-              <div className="relative w-full md:w-auto md:max-w-xs">
+              <div className="relative w-full md:w-auto md:min-w-[320px]">
                   <input 
                     type="text" 
-                    placeholder={isAdmin ? "Search all logs..." : "Search..."}
+                    placeholder={isAdmin ? "Search logs (e.g. Event Name, 2025-12-01)..." : "Search (e.g. Annual Food Drive, 2025-12-01)..."}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-gps-blue focus:border-gps-blue outline-none transition-all text-sm bg-white/80"
