@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from 'react';
 import { useStore } from '../contexts/StoreContext';
 import { Clock, Star, Sparkles, Search, Award, Crown, Zap, Calendar, MapPin, ArrowRight, Share2, X, AlertCircle, TrendingUp, Users } from 'lucide-react';
@@ -169,18 +167,18 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-20 md:pb-0 relative">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
             {isAdmin ? 'Manager Dashboard' : 'My Profile'}
           </h1>
-          <p className="text-slate-500">
-            {isAdmin ? 'Overview of all volunteer activities and data.' : 'Track your journey and rewards.'}
+          <p className="text-sm md:text-base text-slate-500">
+            {isAdmin ? 'Overview of all volunteer activities.' : 'Track your journey and rewards.'}
           </p>
         </div>
         {!isAdmin && (
-            <Link to="/log-hours" className="bg-gps-blue hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-200 transition-all flex items-center gap-2 transform hover:scale-105">
+            <Link to="/log-hours" className="w-full md:w-auto bg-gps-blue hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 transform active:scale-95">
                 <Clock size={18} />
                 Log Hours
             </Link>
@@ -194,22 +192,24 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* TOP ROW: REWARDS & CHART */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
         
         {/* REWARDS CARD */}
-        <div className="xl:col-span-2 glass-card rounded-3xl p-8 border border-white/50 shadow-xl relative overflow-hidden group">
+        {/* Adjusted padding: p-5 md:p-8 */}
+        <div className="xl:col-span-2 glass-card rounded-3xl p-5 md:p-8 border border-white/50 shadow-xl relative overflow-hidden group">
             {/* Background Effects */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
             
-            <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+            <div className="relative z-10 flex flex-col md:flex-row gap-6 md:gap-8 items-center">
                 
-                {/* Points Circle / Badge */}
+                {/* Points Circle / Badge - Scaled down on mobile */}
                 <div className="relative shrink-0">
-                    <div className={`w-32 h-32 rounded-full border-4 ${currentLevel.border} flex items-center justify-center bg-white shadow-[0_10px_30px_rgba(0,0,0,0.05)]`}>
+                    <div className={`w-24 h-24 md:w-32 md:h-32 rounded-full border-4 ${currentLevel.border} flex items-center justify-center bg-white shadow-[0_10px_30px_rgba(0,0,0,0.05)]`}>
                         <div className="text-center">
-                            <span className={`block text-3xl font-extrabold ${currentLevel.color}`}>{currentPoints}</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Points</span>
+                            {/* Smaller font on mobile */}
+                            <span className={`block text-2xl md:text-3xl font-extrabold ${currentLevel.color}`}>{currentPoints}</span>
+                            <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest font-bold">Points</span>
                         </div>
                     </div>
                     <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-slate-800 text-white shadow-lg whitespace-nowrap flex items-center gap-1`}>
@@ -219,13 +219,13 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 {/* Progress Bar Area */}
-                <div className="flex-1 w-full">
-                    <div className="flex justify-between items-end mb-3">
+                <div className="flex-1 w-full text-center md:text-left">
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-3 gap-1">
                         <div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-1">
+                            <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-1">
                                 {isAdmin ? 'Total Organization Impact' : `Current Status: ${currentLevel.name}`}
                             </h3>
-                            <p className="text-sm text-slate-500">
+                            <p className="text-xs md:text-sm text-slate-500">
                                 {isAdmin 
                                     ? "Aggregated data from all volunteers" 
                                     : (nextLevel 
@@ -240,7 +240,7 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* The Bar - Gold Themed */}
-                    <div className="h-5 bg-slate-100 rounded-full overflow-hidden relative shadow-inner border border-slate-200">
+                    <div className="h-4 md:h-5 bg-slate-100 rounded-full overflow-hidden relative shadow-inner border border-slate-200 w-full">
                         <div 
                             className="h-full transition-all duration-1000 ease-out relative bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 shadow-[0_0_15px_rgba(251,191,36,0.5)]"
                             style={{ width: `${progressPercent}%` }}
@@ -255,44 +255,45 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Tiers Legend */}
+                    {/* Tiers Legend - Mobile safe */}
                     {!isAdmin && (
-                        <div className="flex justify-between mt-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider relative">
-                            <span className="w-8 text-left">0</span>
-                            <span className="w-8 text-center">500</span>
-                            <span className="w-8 text-center">1000</span>
-                            <span className="w-8 text-center">2000</span>
-                            <span className="w-8 text-right">3500+</span>
+                        <div className="flex justify-between mt-3 md:mt-4 text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-wider relative px-1">
+                            <span className="text-left">0</span>
+                            <span className="text-center">500</span>
+                            <span className="text-center">1000</span>
+                            <span className="text-center">2000</span>
+                            <span className="text-right">3500+</span>
                         </div>
                     )}
                 </div>
             </div>
             
             {/* AI Insight Footer */}
-            <div className="mt-8 pt-6 border-t border-slate-100 flex gap-3 items-start md:items-center">
+            <div className="mt-6 md:mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row gap-3 items-center text-center md:text-left">
                 <div className="bg-gradient-to-br from-yellow-50 to-amber-100 p-2.5 rounded-lg text-amber-600 shrink-0 shadow-sm border border-amber-200">
                     <Sparkles size={18} className="animate-pulse" />
                 </div>
-                <p className="text-sm text-slate-600 italic font-medium">"{aiMessage}"</p>
+                <p className="text-sm text-slate-600 italic font-medium leading-relaxed">"{aiMessage}"</p>
             </div>
         </div>
 
         {/* ACTIVITY CHART */}
-        <div className="glass-card rounded-3xl p-6 border border-white/50 shadow-xl flex flex-col">
+        <div className="glass-card rounded-3xl p-5 md:p-6 border border-white/50 shadow-xl flex flex-col">
             <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <TrendingUp size={20} className="text-gps-green"/>
                 {isAdmin ? 'Total Activity' : 'Monthly Activity'}
             </h3>
-            {/* FIX: Set explicit height to prevent Recharts calculation error */}
-            <div className="w-full h-[300px]">
+            {/* Adjusted height for mobile: h-[250px] */}
+            <div className="w-full h-[250px] md:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
+                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <XAxis 
                             dataKey="name" 
                             axisLine={false} 
                             tickLine={false} 
-                            tick={{fontSize: 12, fill: '#94a3b8'}}
+                            tick={{fontSize: 10, fill: '#94a3b8'}}
                             dy={10}
+                            interval={0}
                         />
                         <Tooltip 
                             cursor={{fill: '#f1f5f9'}}
@@ -312,46 +313,46 @@ const Dashboard: React.FC = () => {
 
       {/* SEARCH & HISTORY SECTION */}
       <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                   <Clock className="text-gps-blue" size={24} />
                   {isAdmin ? 'All Volunteer Logs' : 'Past Activities'}
               </h2>
-              <div className="relative w-full max-w-xs flex flex-col">
-                  <div className="relative">
-                      <input 
-                        type="text" 
-                        placeholder={isAdmin ? "Search all logs..." : "Search..."}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-gps-blue focus:border-gps-blue outline-none transition-all text-sm bg-white/80"
-                      />
-                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  </div>
+              <div className="relative w-full md:w-auto md:max-w-xs">
+                  <input 
+                    type="text" 
+                    placeholder={isAdmin ? "Search all logs..." : "Search..."}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-gps-blue focus:border-gps-blue outline-none transition-all text-sm bg-white/80"
+                  />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
           </div>
 
-          <div className="glass-card rounded-2xl overflow-hidden shadow-sm border border-slate-100 mt-2">
+          <div className="glass-card rounded-2xl overflow-hidden shadow-sm border border-slate-100 mt-2 w-full">
              {filteredSessions.length > 0 ? (
-                 <div className="overflow-x-auto">
-                     <table className="w-full text-left">
+                 <div className="overflow-x-auto w-full">
+                     {/* min-w set to ensure table doesn't cramp up on small screens, allowing scroll */}
+                     <table className="w-full text-left min-w-[600px]">
                          <thead className="bg-slate-50/80 border-b border-slate-100">
                              <tr>
-                                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Program Name</th>
-                                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Supervisor</th>
-                                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Hours</th>
-                                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Points</th>
+                                 {/* Adjusted padding for mobile: px-4 */}
+                                 <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                                 <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Program Name</th>
+                                 <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Supervisor</th>
+                                 <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Hours</th>
+                                 <th className="px-4 md:px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Points</th>
                              </tr>
                          </thead>
                          <tbody className="divide-y divide-slate-100">
                              {filteredSessions.map((s) => (
                                  <tr key={s.id} className="hover:bg-blue-50/30 transition-colors">
-                                     <td className="px-6 py-4 text-sm font-medium text-slate-600 whitespace-nowrap">{s.date}</td>
-                                     <td className="px-6 py-4 text-sm text-slate-800 font-semibold">{s.eventName}</td>
-                                     <td className="px-6 py-4 text-sm text-slate-600">{s.supervisorName}</td>
-                                     <td className="px-6 py-4 text-sm text-slate-600 text-right">{s.hours}</td>
-                                     <td className="px-6 py-4 text-sm font-bold text-gps-blue text-right">+{Math.floor(s.hours * 10)} pts</td>
+                                     <td className="px-4 md:px-6 py-4 text-sm font-medium text-slate-600 whitespace-nowrap">{s.date}</td>
+                                     <td className="px-4 md:px-6 py-4 text-sm text-slate-800 font-semibold">{s.eventName}</td>
+                                     <td className="px-4 md:px-6 py-4 text-sm text-slate-600">{s.supervisorName}</td>
+                                     <td className="px-4 md:px-6 py-4 text-sm text-slate-600 text-right">{s.hours}</td>
+                                     <td className="px-4 md:px-6 py-4 text-sm font-bold text-gps-blue text-right">+{Math.floor(s.hours * 10)} pts</td>
                                  </tr>
                              ))}
                          </tbody>
