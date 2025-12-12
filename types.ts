@@ -1,5 +1,4 @@
 
-
 export enum UserRole {
   VOLUNTEER = 'VOLUNTEER',
   ADMIN = 'ADMIN'
@@ -13,6 +12,22 @@ export interface User {
   role?: 'ADMIN' | 'VOLUNTEER';
   orientationSigned: boolean;
   orientationDate?: string;
+  
+  // Extended Profile Fields from Registration
+  phone?: string;
+  age?: string;
+  gender?: string;
+  statusInCanada?: string;
+  address?: string;
+  languages?: string;
+  identity?: string;
+  occupation?: string;
+  schoolOrg?: string;
+  referralSource?: string;
+  skills?: string;
+  medicalConditions?: string;
+  experience?: string;
+  availability?: string;
 }
 
 export interface WorkSession {
