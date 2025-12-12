@@ -53,7 +53,7 @@ const BrandLogo: React.FC<{ className?: string }> = ({ className }) => {
             Volunteer
           </h1>
           <h2 className="font-bold text-gps-green text-[10px] md:text-xs uppercase tracking-[0.2em]">
-            Management
+            Management System
           </h2>
       </div>
     </div>
