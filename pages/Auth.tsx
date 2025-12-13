@@ -13,13 +13,13 @@ type Step = 'LOGIN' | 'WELCOME' | 'PERSONAL' | 'BACKGROUND' | 'DETAILS' | 'AGREE
 
 const ROLES_OPTIONS = [
   "Event Support",
-  "Administrative Help",
+  "Administrative Support",
   "Fundraising",
   "Marketing",
   "Social Media",
-  "Program Facilitation",
-  "Classroom Help",
-  "Parent Help",
+  "Program Assistant",
+  "Classroom Assistant",
+  "Parent Support",
   "Cleaning and Organizing",
   "Other"
 ];
