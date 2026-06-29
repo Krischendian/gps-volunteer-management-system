@@ -23,7 +23,7 @@ paper-based processes. Delivered solo in 2 weeks (July 2025).
 React 19 · TypeScript · Firebase Auth · Firestore · 
 Google Gemini API · Tailwind CSS · Recharts · Vercel
 
-## Try it now:
+## Try it now
 https://gps-volunteer-system.vercel.app/
 
 ## Screenshots
